@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<footer th:fragment="footer" class="bg-dark text-light pt-4 pb-3 mt-5">
+  <div class="container-xl">
+
+    <div class="row gy-4 align-items-start">
+      <!-- Logo + mô tả -->
+      <div class="col-md-4 text-center text-md-start">
+        <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2 mb-2">
+          <h6 class="m-0 fw-bold">Spring Boot</h6>
+        </div>
+        <p class="small text-white-50 mb-1">
+          Bài thực hành số 7 – Thymeleaf
+        </p>
+        <div class="small text-white-50">
+          <div>MSSV: <strong>23110276</strong></div>
+          <div>Họ tên: <strong>Cáp Thanh Nhàn</strong></div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="col-md-4 text-center">
+        <h6 class="fw-bold mb-2">Liên kết nhanh</h6>
+        <ul class="list-unstyled small mb-0">
+          <li class="mb-1"><a th:href="@{/}" class="link-light text-decoration-none">Trang chủ</a></li>
+          <li class="mb-1"><a th:href="@{/admin/categories}" class="link-light text-decoration-none">Danh mục</a></li>
+          <li><a href="mailto:thanhnau25@gmail.com" class="link-light text-decoration-none">Liên hệ</a></li>
+        </ul>
+      </div>
+
+      <!-- Social + Back to top -->
+      <div class="col-md-4 text-center text-md-end">
+        <h6 class="fw-bold mb-2">Kết nối</h6>
+        <div class="d-flex justify-content-center justify-content-md-end gap-3 mb-3">
+          <a href="mailto:thanhnau25@gmail.com"
+             class="text-light fs-5 d-inline-flex align-items-center"
+             aria-label="Email">
+            <i class="bi bi-envelope-fill"></i>
+          </a>
+          <a href="https://facebook.com/thanhcap.nhan" target="_blank" rel="noopener"
+             class="text-light fs-5 d-inline-flex align-items-center"
+             aria-label="Facebook">
+            <i class="bi bi-facebook"></i>
+          </a>
+          <a href="https://github.com/nauctn7" target="_blank" rel="noopener"
+             class="text-light fs-5 d-inline-flex align-items-center"
+             aria-label="GitHub">
+            <i class="bi bi-github"></i>
+          </a>
+        </div>
+        <button id="btnBackTop" type="button"
+                class="btn btn-outline-light btn-sm rounded-circle shadow"
+                style="width: 36px; height: 36px; display:none;"
+                aria-label="Back to top">
+          <i class="bi bi-arrow-up"></i>
+        </button>
+      </div>
+    </div>
+
+    <hr class="border-secondary mt-4 mb-2">
+    <div class="text-center small text-white-50">
+      © <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy')}">2025</span>
+      • 23110276 • Cáp Thanh Nhàn • HCMUTE
+    </div>
+  </div>
+
+  <!-- Script back-to-top -->
+  <script>
+    (function(){
+      const btn = document.getElementById('btnBackTop');
+      if(!btn) return;
+      const onScroll = () => { btn.style.display = window.scrollY > 200 ? 'inline-flex' : 'none'; };
+      window.addEventListener('scroll', onScroll, { passive:true });
+      btn.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
+      onScroll();
+    })();
+  </script>
+
+  <style>
+    /* nhẹ nhàng cho link hover */
+    .link-light.text-decoration-none:hover { text-decoration: underline; }
+  </style>
+</footer>
+</body>
+</html>

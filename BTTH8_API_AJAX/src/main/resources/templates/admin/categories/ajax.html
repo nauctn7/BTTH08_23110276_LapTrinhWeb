@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout/layout_admin}">
+<head>
+<title layout:fragment="title">Category (AJAX)</title>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<!-- Icons -->
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+.toolbar .form-control {
+	min-width: 260px;
+}
+
+.table td, .table th {
+	vertical-align: middle;
+}
+
+.img-icon {
+	height: 36px;
+	max-width: 120px;
+	object-fit: contain;
+}
+
+.text-nowrap {
+	white-space: nowrap;
+}
+</style>
+</head>
+<body>
+	<main layout:fragment="content" class="container my-4">
+
+		<div class="card shadow-sm border-0">
+			<div
+				class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+				<h5 class="m-0">Category (AJAX)</h5>
+
+				<div class="toolbar d-flex align-items-center gap-2">
+					<input id="q" class="form-control form-control-sm"
+						placeholder="Search name (Nhập tên)…">
+					<button id="btnSearch" class="btn btn-primary btn-sm text-nowrap">
+						<i class="bi bi-search"></i> <span
+							th:text="#{iotstar.value.search}">Tìm kiếm</span>
+					</button>
+
+					<button id="btnReload" class="btn btn-outline-secondary btn-sm">
+						<i class="bi bi-arrow-clockwise"></i> <span th:text="#{reload}">Reload</span>
+					</button>
+
+				</div>
+			</div>
+
+			<div class="card-body">
+				<div class="table-responsive">
+					<table class="table table-hover align-middle mb-0">
+						<thead class="table-dark">
+							<tr>
+								<th style="width: 90px" th:text="#{iotstar.value.id}">ID</th>
+								<th th:text="#{iotstar.value.name}">Tên danh mục</th>
+								<th style="width: 140px" th:text="#{icon}">Icon</th>
+								<th style="width: 180px" class="text-center"
+									th:text="#{iotstar.value.actions}">Hành động</th>
+							</tr>
+						</thead>
+
+						<tbody id="rows">
+							<!-- JS fill here -->
+						</tbody>
+					</table>
+				</div>
+
+				<hr class="my-4">
+				<h6 class="mb-3" th:text="#{iotstar.value.addCate}">Create
+					Category</h6>
+				<form id="frmCreate" class="row gy-2 align-items-end"
+					enctype="multipart/form-data">
+					<div class="col-12 col-md-4">
+						<label class="form-label" th:text="#{cate.name}">Name</label> <input
+							name="categoryName" class="form-control"
+							th:placeholder="#{cate.name.placeholder}" placeholder="Nhập tên…">
+					</div>
+					<div class="col-12 col-md-4">
+						<label class="form-label">Icon (tuỳ chọn)</label> <input
+							name="icon" type="file" class="form-control" accept="image/*">
+					</div>
+					<div class="col-12 col-md-4">
+						<button class="btn btn-success text-nowrap">
+							<i class="bi bi-plus-circle"></i> <span th:text="#{btn.save}">Save</span>
+						</button>
+						<button type="reset" class="btn btn-outline-secondary text-nowrap"
+							id="btnCancelCreate">
+							<i class="bi bi-x-circle"></i> <span th:text="#{btn.back}">Cancel</span>
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<!-- Modal Update -->
+		<div class="modal fade" id="modalUpdate" tabindex="-1"
+			aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered">
+				<form id="frmUpdate" class="modal-content"
+					enctype="multipart/form-data">
+					<div class="modal-header">
+						<h5 class="modal-title" th:text="#{cate.title.edit}">Update
+							Category</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+					</div>
+
+					<div class="modal-body row g-3">
+						<input type="hidden" name="categoryId" id="upId">
+						<div class="col-12">
+							<label class="form-label" th:text="#{cate.name}">Name</label> <input
+								name="categoryName" id="upName" class="form-control">
+						</div>
+						<div class="col-12">
+							<label class="form-label" th:text="#{icon}">Icon mới (tuỳ
+								chọn)</label> <input name="icon" id="upIcon" type="file"
+								class="form-control" accept="image/*">
+							<div class="form-text" th:text="#{icon.optional}">Để trống
+								nếu giữ icon cũ</div>
+						</div>
+						<div class="col-12">
+							<span th:text="#{icon.current}">Icon hiện tại:</span>
+							<div id="upPreview" class="mt-1"></div>
+						</div>
+					</div>
+
+					<div class="modal-footer">
+						<button class="btn btn-primary text-nowrap">
+							<i class="bi bi-check2-circle"></i> <span th:text="#{btn.update}">Update</span>
+						</button>
+						<button type="button"
+							class="btn btn-outline-secondary text-nowrap"
+							data-bs-dismiss="modal">
+							<i class="bi bi-x-circle"></i> <span th:text="#{btn.back}">Close</span>
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+	</main>
+</html>
+<script th:inline="javascript">
+$(function () {
+  // contextPath
+  const contextPath = /*[[@{/}]]*/ '/';
+  const API = contextPath.replace(/\/$/, '') + '/api/category';
+  // inject text i18n cho JS
+  const txtEdit    = /*[[#{iotstar.value.edit}]]*/ 'Edit';
+  const txtDelete  = /*[[#{iotstar.value.delete}]]*/ 'Delete';
+  const txtConfirm = /*[[#{iotstar.value.confirmDelete}]]*/ 'Are you sure?';
+  const txtNoData  = /*[[#{iotstar.value.noData}]]*/ 'No data';
+  function rowHtml(c) {
+    const icon = c.icon
+      ? `<img class="img-icon" src="${contextPath}files/${c.icon}" alt="icon">`
+      : `<span class="text-muted">—</span>`;
+    return `
+      <tr data-id="${c.categoryId}">
+        <td>${c.categoryId}</td>
+        <td class="c-name">${c.categoryName ?? ''}</td>
+        <td>${icon}</td>
+        <td class="text-center">
+          <button class="btn btn-sm btn-warning me-1 btn-edit">
+            <i class="bi bi-pencil-square"></i> ${txtEdit}
+          </button>
+          <button class="btn btn-sm btn-danger btn-del">
+            <i class="bi bi-trash"></i> ${txtDelete}
+          </button>
+        </td>
+      </tr>`;
+  }
+
+  function loadList() {
+	  const q = ($('#q').val() || '').toLowerCase().trim();
+      $.getJSON(API, function(list){
+        const $tbody = $('#rows').empty();
+        if (!list || list.length === 0) {
+          $tbody.append(`<tr><td colspan="4" class="text-center text-muted">${txtNoData}</td></tr>`);
+          return;
+        }
+        (list || [])
+          .filter(c => !q || (c.categoryName || '').toLowerCase().includes(q))
+          .forEach(c => $tbody.append(rowHtml(c)));
+      });
+  }
+
+  // Create (CHẶN SUBMIT FORM)
+  $('#frmCreate').on('submit', function (e) {
+    e.preventDefault();
+    const fd = new FormData(this);
+    $.ajax({
+      url: API + '/addCategory',
+      method: 'POST',
+      data: fd,
+      processData: false,
+      contentType: false
+    })
+    .done(() => { this.reset(); loadList(); })
+    .fail(xhr => alert(xhr.responseJSON?.message || 'Create failed'));
+    return false; // chặn thêm 1 lớp cho chắc
+  });
+
+  // Edit → mở modal
+  $(document).on('click', '.btn-edit', function () {
+    const id = $(this).closest('tr').data('id');
+    $('#upId').val(id);
+    $.getJSON(API + '/get', { id }, res => {
+      const c = res.data || {};
+      $('#upName').val(c.categoryName || '');
+      $('#upPreview').html(c.icon
+        ? `<img class="img-icon" src="${contextPath}files/${c.icon}" alt="icon">`
+        : `<span class="text-muted">—</span>`);
+      new bootstrap.Modal('#modalUpdate').show();
+    });
+  });
+
+  // Update
+  $('#frmUpdate').on('submit', function (e) {
+    e.preventDefault();
+    const fd = new FormData(this);
+    $.ajax({
+      url: API + '/updateCategory',
+      method: 'PUT',
+      data: fd,
+      processData: false,
+      contentType: false
+    })
+    .done(() => {
+      bootstrap.Modal.getInstance(document.getElementById('modalUpdate')).hide();
+      loadList();
+    })
+    .fail(xhr => alert(xhr.responseJSON?.message || 'Update failed'));
+    return false;
+  });
+
+  // Delete
+  $(document).on('click', '.btn-del', function () {
+    const id = $(this).closest('tr').data('id');
+    if (!confirm(txtConfirm + ' #' + id + '?')) return;
+    $.ajax({
+      url: API + '/deleteCategory',
+      method: 'DELETE',
+      data: { categoryId: id }
+    })
+    .done(loadList)
+    .fail(xhr => alert(xhr.responseJSON?.message || 'Delete failed'));
+  });
+
+  // Search & Reload
+  $('#btnSearch').on('click', loadList);
+  $('#btnReload').on('click', () => { $('#q').val(''); loadList(); });
+
+  // INIT
+  console.log('Category AJAX init');
+  loadList();
+});
+
+</script>
+<script th:inline="javascript">
+$(function(){
+  $('#langSelect').on('change', function(){
+    const lang = $(this).val();
+    const url = window.location.pathname + '?lang=' + lang;
+    window.location.href = url;
+  });
+});
+</script>
+

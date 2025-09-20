@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="header">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-lg">
+     <!-- Logo/Hình ảnh bên trái -->
+      <a class="navbar-brand fw-bold d-flex align-items-center" th:href="@{/}">
+        <img src="/images/logo.png" alt="Logo" 
+              style="height: 50px; width: 50px; border-radius: 50%; object-fit: cover; margin-right: 8px;">
+        Admin
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div id="topNav" class="collapse navbar-collapse">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" th:href="@{/admin/categories}" th:text="#{iotstar.value.listCate}">Danh mục</a>
+          </li>
+        </ul>
+
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="?language=vi">Việt Nam</a></li>
+          <li class="nav-item"><a class="nav-link" href="?language=en">English</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+</body>
+</html>
